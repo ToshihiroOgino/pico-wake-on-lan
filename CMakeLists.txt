@@ -35,14 +35,18 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(pico2-server pico2-server.cpp )
+add_executable(pico2-server
+    src/pico2-server.cpp
+    src/xip_config.cpp
+    src/wifi.cpp
+    )
 
 pico_set_program_name(pico2-server "pico2-server")
 pico_set_program_version(pico2-server "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(pico2-server 1)
-pico_enable_stdio_usb(pico2-server 1)
+pico_enable_stdio_usb(pico2-server 0)
 
 # Add the standard library to the build
 target_link_libraries(pico2-server
@@ -51,12 +55,13 @@ target_link_libraries(pico2-server
 # Add the standard include files to the build
 target_include_directories(pico2-server PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/src
+        ${CMAKE_CURRENT_LIST_DIR}/opt # For lwipopts.h
 )
 
 # Add any user requested libraries
-target_link_libraries(pico2-server 
-        pico_cyw43_arch_lwip_threadsafe_background
+target_link_libraries(pico2-server
+        pico_cyw43_arch_lwip_poll
         )
 
 pico_add_extra_outputs(pico2-server)
-

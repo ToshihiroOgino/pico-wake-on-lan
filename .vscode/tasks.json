@@ -6,7 +6,10 @@
             "type": "process",
             "isBuildCommand": true,
             "command": "${userHome}/.pico-sdk/ninja/v1.12.1/ninja",
-            "args": ["-C", "${workspaceFolder}/build"],
+            "args": [
+                "-C",
+                "${workspaceFolder}/build"
+            ],
             "group": "build",
             "presentation": {
                 "reveal": "always",
@@ -53,6 +56,18 @@
             "windows": {
                 "command": "${env:USERPROFILE}/.pico-sdk/openocd/0.12.0+dev/openocd.exe",
             }
+        },
+        {
+            "label": "Flash .env",
+            "type": "process",
+            "command": "picotool",
+            "args": [
+                "load",
+                "-o",
+                "0x10100000",
+                "-t",
+                ".env"
+            ],
         }
     ]
 }

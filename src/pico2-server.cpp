@@ -2,35 +2,26 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 
+#include "wifi.h"
+#include "xip_config.h"
+
 #define BUILTIN_LED CYW43_WL_GPIO_LED_PIN
 #define GPIO_BTN 15
 
-int connect_wifi() {
-	// Enable wifi station
-	cyw43_arch_enable_sta_mode();
-
-	printf("Connecting to Wi-Fi...\n");
-	if (cyw43_arch_wifi_connect_timeout_ms("Your Wi-Fi SSID",
-																				 "Your Wi-Fi Password",
-																				 CYW43_AUTH_WPA2_AES_PSK, 30000)) {
-		printf("failed to connect.\n");
-		return 1;
-	} else {
-		printf("Connected.\n");
-		// Read the ip address in a human readable way
-		uint8_t *ip_address = (uint8_t *)&(cyw43_state.netif[0].ip_addr.addr);
-		printf("IP address %d.%d.%d.%d\n", ip_address[0], ip_address[1],
-					 ip_address[2], ip_address[3]);
-	}
-	return 0;
-}
-
 int init() {
 	stdio_init_all();
+	if (load_config()) {
+		printf("Failed to load config\n");
+		return 1;
+	}
 	gpio_init(GPIO_BTN);
 	gpio_set_dir(GPIO_BTN, GPIO_IN);
 	gpio_pull_up(GPIO_BTN);
-	return cyw43_arch_init();
+	if (cyw43_arch_init()) {
+		printf("Failed to initialize CYW43\n");
+		return 1;
+	}
+	return 0;
 }
 
 static bool cyw43_led = false;
@@ -41,21 +32,35 @@ void toggle_led() {
 
 int main() {
 	if (init()) {
-		printf("init failed\n");
 		return -1;
 	}
+
+	// if (connect_wifi()) {
+	// 	while(true){
+	// 		printf("WiFi Connection Failed\n");
+	// 		sleep_ms(1000);
+	// 	}
+	// }
 
 	const int loop_delay = 1;
 	int counter = 0;
 	const int max_counter = 2000 / loop_delay;
 
+	const auto ip = get_config_value("ipv4");
+	const auto ssid = get_config_value("ssid");
+	const auto password = get_config_value("password");
+
 	while (true) {
 		if (counter++ >= max_counter) {
-			printf(".\n");
+			printf("led\n");
 			counter = 0;
 			cyw43_arch_gpio_put(BUILTIN_LED, true);
 			sleep_ms(100);
 			cyw43_arch_gpio_put(BUILTIN_LED, false);
+
+			printf("IP: %s\n", ip.c_str());
+			printf("SSID: %s\n", ssid.c_str());
+			printf("Password: %s\n", password.c_str());
 		}
 
 		if (gpio_get(GPIO_BTN) != GPIO_IRQ_LEVEL_LOW) {
