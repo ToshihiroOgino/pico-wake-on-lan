@@ -9,6 +9,14 @@ using namespace std;
 
 static map<string, string> config_values;
 
+string trim_space(const string &str) {
+	size_t first = str.find_first_not_of(' ');
+	if (first == string::npos)
+		return "";
+	size_t last = str.find_last_not_of(' ');
+	return str.substr(first, (last - first + 1));
+}
+
 int load_config() {
 	char *config_ptr = (char *)CONFIG_ADDRESS;
 	istringstream iss(config_ptr);
@@ -16,10 +24,10 @@ int load_config() {
 	while (getline(iss, line)) {
 		auto separator_pos = line.find('=');
 		if (separator_pos != string::npos) {
-			string key = line.substr(0, separator_pos);
+			const string key = line.substr(0, separator_pos);
 			transform(key.begin(), key.end(), key.begin(), ::tolower);
-			string value = line.substr(separator_pos + 1);
-			config_values[key] = value;
+			const string value = line.substr(separator_pos + 1);
+			config_values[trim_space(key)] = trim_space(value);
 		} else {
 			printf("Invalid config line: %s\n", line.c_str());
 			return 1;
