@@ -22,7 +22,7 @@ int load_config() {
 	istringstream iss(config_ptr);
 	string line;
 	while (getline(iss, line)) {
-		auto separator_pos = line.find('=');
+		const size_t separator_pos = line.find('=');
 		if (separator_pos != string::npos) {
 			const string key = line.substr(0, separator_pos);
 			transform(key.begin(), key.end(), key.begin(), ::tolower);

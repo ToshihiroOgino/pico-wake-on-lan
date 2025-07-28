@@ -37,9 +37,7 @@ int connect_wifi() {
 																				 CYW43_AUTH_WPA2_AES_PSK, 30000)) {
 		printf("Failed to connect to Wi-Fi.\n");
 		return 1;
-	} else {
-		printf("Connected.\nIP Address: %s\n", ipv4.c_str());
 	}
-
+	printf("Connected.\nIP Address: %s\n", ipv4.c_str());
 	return 0;
 }
