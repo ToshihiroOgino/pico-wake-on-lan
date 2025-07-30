@@ -4,6 +4,8 @@
 #include <map>
 #include <sstream>
 
+#include "error_handler.h"
+
 using namespace std;
 
 static map<string, string> config_values;
@@ -16,7 +18,7 @@ string trim_space(const string &str) {
 	return str.substr(first, (last - first + 1));
 }
 
-int load_config() {
+void load_config() {
 	char *config_ptr = (char *)CONFIG_ADDRESS;
 	istringstream iss(config_ptr);
 	string line;
@@ -28,11 +30,10 @@ int load_config() {
 			string value = line.substr(separator_pos + 1);
 			config_values[trim_space(key)] = trim_space(value);
 		} else {
-			printf("Invalid config line: %s\n", line.c_str());
-			return 1;
+			handle_error(("Invalid config line: " + line).c_str());
 		}
 	}
-	return 0;
+	return;
 }
 
 string get_config_value(const string &key) {
