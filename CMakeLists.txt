@@ -45,12 +45,14 @@ pico_set_program_name(pico2-server "pico2-server")
 pico_set_program_version(pico2-server "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(pico2-server 1)
-pico_enable_stdio_usb(pico2-server 0)
+pico_enable_stdio_uart(pico2-server 0)
+pico_enable_stdio_usb(pico2-server 1)
 
 # Add the standard library to the build
-target_link_libraries(pico2-server
-        pico_stdlib)
+target_link_libraries(
+        pico2-server
+        pico_stdlib
+        )
 
 # Add the standard include files to the build
 target_include_directories(pico2-server PRIVATE
