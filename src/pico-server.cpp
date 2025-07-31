@@ -23,7 +23,7 @@ void toggle_led() {
 
 static bool connected = false;
 
-err_t connected_fn(void *arg, struct tcp_pcb *tpcb, err_t err) {
+err_t connected_fn(void *arg, struct tcp_pcb *pcb, err_t err) {
 	if (err != ERR_OK) {
 		auto msg = "Connection failed: " + std::to_string(err);
 		return err;
@@ -38,8 +38,8 @@ err_t connected_fn(void *arg, struct tcp_pcb *tpcb, err_t err) {
 	}
 	connected = true;
 	memcpy(p->payload, msg, msg_len);
-	tcp_write(tpcb, p->payload, p->len, TCP_WRITE_FLAG_COPY);
-	tcp_output(tpcb);
+	tcp_write(pcb, p->payload, p->len, TCP_WRITE_FLAG_COPY);
+	tcp_output(pcb);
 	return ERR_OK;
 }
 

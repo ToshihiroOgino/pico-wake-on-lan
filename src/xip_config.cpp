@@ -33,7 +33,7 @@ void load_config() {
 			handle_error(("Invalid config line: " + line).c_str());
 		}
 	}
-	return;
+	printf("Configuration loaded successfully.\n");	return;
 }
 
 string get_config_value(const string &key) {
