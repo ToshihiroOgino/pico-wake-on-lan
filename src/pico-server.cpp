@@ -50,6 +50,7 @@ int main() {
 	printf("Server started on port %d\n", port);
 
 	while (true) {
+		printf(".");
 		toggle_led();
 		sleep_ms(1000);
 	}

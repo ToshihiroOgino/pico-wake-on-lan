@@ -10,7 +10,7 @@
 int connect_wifi(const char *ssid, const char *password) {
 	cyw43_arch_enable_sta_mode();
 	if (cyw43_arch_wifi_connect_timeout_ms(
-					ssid, password, CYW43_AUTH_WPA2_AES_PSK, 15000) != PICO_ERROR_NONE) {
+					ssid, password, CYW43_AUTH_WPA2_AES_PSK, 30000) != PICO_ERROR_NONE) {
 		return 1;
 	}
 	auto self_ip = ip4addr_ntoa(netif_ip4_addr(netif_list));
