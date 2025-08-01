@@ -71,7 +71,7 @@ def main():
     )
     otp = generate_totp(SECRET_KEY, current_time_stamp)
     print(f"Generated TOTP: {otp}")
-    # send_message(HOST, PORT, otp)
+    send_message(HOST, PORT, otp)
 
 
 if __name__ == "__main__":
