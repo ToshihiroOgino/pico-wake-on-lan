@@ -15,37 +15,18 @@
 
 ntp_client_t *ntp_client = NULL;
 
-const time_t jst_diff = 9 * 3600;
-
-char *to_jst_str(time_t epoch) {
-	time_t jst_epoch = difftime(epoch, jst_diff);
-	char buf[25] = {};
-	snprintf(buf, sizeof(buf), "%04d-%02d-%02d %02d:%02d:%02d JST",
-					 1900 + localtime(&jst_epoch)->tm_year,
-					 1 + localtime(&jst_epoch)->tm_mon, localtime(&jst_epoch)->tm_mday,
-					 localtime(&jst_epoch)->tm_hour, localtime(&jst_epoch)->tm_min,
-					 localtime(&jst_epoch)->tm_sec);
-	return strdup(buf);
-}
-
-char *to_utc_str(time_t epoch) {
-	char buf[25] = {};
-	snprintf(buf, sizeof(buf), "%04d-%02d-%02d %02d:%02d:%02d UTC",
-					 1900 + gmtime(&epoch)->tm_year, 1 + gmtime(&epoch)->tm_mon,
-					 gmtime(&epoch)->tm_mday, gmtime(&epoch)->tm_hour,
-					 gmtime(&epoch)->tm_min, gmtime(&epoch)->tm_sec);
-	return strdup(buf);
-}
-
 void ntp_result(ntp_client_t *client, int status, time_t *result_utc) {
 	if (status == 0 && result_utc) {
 		client->ntp_succeed_at = get_absolute_time();
 		client->ntp_result_utc = *result_utc;
 
-		auto time_str = to_jst_str(*result_utc);
-		// auto time_str = to_utc_str(epoch);
-		printf("NTP time: %s\n", time_str);
-		free(time_str);
+		printf("NTP time: %04d-%02d-%02d %02d:%02d:%02d UTC\n",
+					 localtime(&client->ntp_result_utc)->tm_year + 1900,
+					 localtime(&client->ntp_result_utc)->tm_mon + 1,
+					 localtime(&client->ntp_result_utc)->tm_mday,
+					 localtime(&client->ntp_result_utc)->tm_hour,
+					 localtime(&client->ntp_result_utc)->tm_min,
+					 localtime(&client->ntp_result_utc)->tm_sec);
 	}
 	async_context_remove_at_time_worker(cyw43_arch_async_context(),
 																			&client->request_worker);
@@ -107,12 +88,6 @@ void ntp_dns_found(const char *hostname, const ip_addr_t *ipaddr, void *arg) {
 	} else {
 		printf("ntp_dns_found: failed to resolve hostname %s\n", NTP_SERVER);
 		ntp_result(client, -1, nullptr);
-
-		// printf("Using fallback NTP server: %s\n", GLOBAL_IP);
-		// ip_addr_t addr;
-		// ip4addr_aton(GLOBAL_IP, &addr);
-		// client->ntp_server_address = addr;
-		// ntp_request(client);
 	}
 }
 
