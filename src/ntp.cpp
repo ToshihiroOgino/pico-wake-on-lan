@@ -37,7 +37,6 @@ void ntp_result(ntp_client_t *client, int status, time_t *result_utc) {
 		async_context_remove_at_time_worker(cyw43_arch_async_context(),
 																				&client->request_worker);
 	}
-	printf("NTP request scheduled in %d ms\n", NTP_REQUEST_TIME_MS);
 }
 
 void ntp_recv(void *arg, udp_pcb *pcb, pbuf *p, const ip_addr_t *addr,
@@ -85,7 +84,6 @@ void ntp_dns_found(const char *hostname, const ip_addr_t *ipaddr, void *arg) {
 	auto client = (ntp_client_t *)arg;
 	if (ipaddr) {
 		client->ntp_server_address = *ipaddr;
-		printf("NTP server resolved: %s\n", hostname);
 		ntp_request(client);
 	} else {
 		printf("Failed to resolve hostname %s\n", NTP_SERVER);
@@ -141,9 +139,8 @@ int run_ntp_client() {
 	ntp_client->resend_worker.do_work = resend_worker_fn;
 	ntp_client->resend_worker.user_data = ntp_client;
 
-	auto res = async_context_add_at_time_worker_in_ms(
-			cyw43_arch_async_context(), &ntp_client->request_worker, 0);
-	if (!res) {
+	if (!async_context_add_at_time_worker_in_ms(cyw43_arch_async_context(),
+																							&ntp_client->request_worker, 0)) {
 		handle_error("Failed to add NTP request worker\n");
 	}
 	return 0;

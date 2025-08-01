@@ -52,14 +52,14 @@ int main() {
 	start_server(port);
 	printf("Server started on port %d\n", port);
 
+	init_led_blink_worker(100, 5000);
+
 	while (true) {
 		const time_t current_time = get_posix_time_utc();
 		struct tm *utc = gmtime(&current_time);
 		printf("%04d-%02d-%02d %02d:%02d:%02d UTC\n", 1900 + utc->tm_year,
 					 1 + utc->tm_mon, utc->tm_mday, utc->tm_hour, utc->tm_min,
 					 utc->tm_sec);
-
-		toggle_led();
-		sleep_ms(10000);
+		sleep_ms(5000);
 	}
 }
