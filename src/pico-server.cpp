@@ -20,6 +20,7 @@ int main() {
 	sleep_ms(3000);
 
 	printf("Starting...\n");
+
 	load_config();
 
 	if (cyw43_arch_init_with_country(CYW43_COUNTRY_JAPAN)) {
@@ -34,8 +35,6 @@ int main() {
 	if (connect_wifi(ssid.c_str(), password.c_str())) {
 		handle_error("Failed to connect to WiFi");
 	}
-	printf("Connected to WiFi, My IP: %s\n",
-				 ip4addr_ntoa(netif_ip4_addr(netif_list)));
 
 	if (init_mdns(hostname.c_str(), port)) {
 		handle_error("Failed to initialize mDNS");
