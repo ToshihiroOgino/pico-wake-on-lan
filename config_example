@@ -4,3 +4,4 @@ ipv4 = 192.168.1.110
 port = 8000
 hostname = pico-server
 totp_secret = your_base_32_encoded_key
+mac_address = 00:00:00:00:00:00

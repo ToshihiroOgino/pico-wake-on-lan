@@ -7,6 +7,7 @@
 #include "ntp.h"
 #include "server.h"
 #include "totp.h"
+#include "wake_on_lan.h"
 #include "xip_config.h"
 
 int main() {
@@ -27,6 +28,10 @@ int main() {
 	const int port = atoi(get_config_value("port").c_str());
 	const auto hostname = get_config_value("hostname");
 	const auto totp_secret = get_config_value("totp_secret");
+	const auto mac_address = get_config_value("mac_address");
+
+	printf("MAC address set to: %s\n", mac_address.c_str());
+	set_mac_address(mac_address.c_str());
 
 	printf("Connecting to WiFi SSID: %s\n", ssid.c_str());
 	if (connect_wifi(ssid.c_str(), password.c_str(), ipv4.c_str())) {

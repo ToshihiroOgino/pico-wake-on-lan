@@ -9,6 +9,7 @@
 #include "error_handler.h"
 #include "ntp.h"
 #include "totp.h"
+#include "wake_on_lan.h"
 
 #define BUFFER_SIZE (PBUF_POOL_BUFSIZE + 1)
 char received_data[BUFFER_SIZE];
@@ -27,6 +28,7 @@ err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 
 	if (is_valid_otp(std::string(received_data, len), get_posix_time_utc())) {
 		printf("Valid OTP received: %s\n", received_data);
+		send_magic_packet();
 	}
 
 	// Echo back the received data
