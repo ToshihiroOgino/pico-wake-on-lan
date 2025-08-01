@@ -1,0 +1,3 @@
+HOST=pico-server.local
+PORT=8000
+SECRET_KEY=your_base_32_encoded_key

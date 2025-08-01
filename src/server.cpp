@@ -19,14 +19,16 @@ err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 		printf("server_recv: error %d\n", err);
 		return ERR_VAL;
 	}
-	auto len = p->len;
+	size_t len = (size_t)p->len;
 	memcpy(received_data, p->payload, p->len);
 	received_data[BUFFER_SIZE - 1] = '\0';
 	printf("Received data: %.*s\n", p->len, received_data);
 	tcp_recved(pcb, p->len);
 	pbuf_free(p);
 
-	if (is_valid_otp(std::string(received_data, len), get_posix_time_utc())) {
+	auto is_valid =
+			is_valid_otp(std::string(received_data, len), get_posix_time_utc());
+	if (is_valid) {
 		printf("Valid OTP received: %s\n", received_data);
 		send_magic_packet();
 	}
@@ -36,6 +38,9 @@ err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 		printf("Not enough send buffer space, closing connection\n");
 		return tcp_close(pcb);
 	}
+
+	snprintf(received_data + len, BUFFER_SIZE - len, is_valid ? "_ok" : "_ng");
+	len = strlen(received_data);
 	err = tcp_write(pcb, received_data, len, TCP_WRITE_FLAG_COPY);
 	if (err != ERR_OK) {
 		printf("tcp_write failed: %d\n", err);
