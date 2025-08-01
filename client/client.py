@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 TOTP_TIME_STEP = 30
 DIGITS = 6
 
-def generate_totp(secret, current_time: int):
+def generate_totp(secret:str, current_time: int) -> str:
     key_decoded = None
     try:
         key_decoded = base64.b32decode(secret.upper() + "=" * (-len(secret) % 8))
