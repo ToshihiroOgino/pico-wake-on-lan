@@ -28,7 +28,6 @@ def generate_totp(secret:str, current_time: int) -> str:
     offset = hmac_hash[-1] & 0x0F
     truncated_hash = hmac_hash[offset : offset + 4]
     otp_value = struct.unpack(">I", truncated_hash)[0] & 0x7FFFFFFF
-    # 桁数に合わせてOTPを生成
     power_of_10 = 10**DIGITS
     otp = str(otp_value % power_of_10).zfill(DIGITS)
     return otp
