@@ -4,7 +4,7 @@
 
 picotool を sudo なしで実行する設定
 
-下記内容で`/etc/udev/rules.d/99-pico.rules`を作成した後、`sudo udevadm control --reload-rules &&  sudo udevadm trigger`を実行する
+下記内容で`/etc/udev/rules.d/99-pico.rules`を作成した後、`sudo udevadm control --reload-rules && sudo udevadm trigger`を実行する
 
 ```plaintext
 # Pico 2w
