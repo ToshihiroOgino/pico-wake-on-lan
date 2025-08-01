@@ -9,25 +9,8 @@ from datetime import datetime, timezone
 import base64
 import struct
 
-# 定数
 TOTP_TIME_STEP = 30
 DIGITS = 6
-
-# 秘密鍵を保持するグローバル変数
-key_decoded = None
-
-
-def base32_decode(encoded_str) -> bytes:
-    encoded_str = encoded_str.upper()
-    missing_padding = len(encoded_str) % 8
-    if missing_padding != 0:
-        encoded_str += "=" * (8 - missing_padding)
-    try:
-        return base64.b32decode(encoded_str)
-    except Exception as e:
-        print(f"Error decoding Base32: {e}")
-        return b""
-
 
 def generate_totp(secret, current_time: int):
     key_decoded = None
@@ -91,7 +74,7 @@ def main():
     )
     otp = generate_totp(SECRET_KEY, current_time_stamp)
     print(f"Generated TOTP: {otp}")
-    send_message(HOST, PORT, otp)
+    # send_message(HOST, PORT, otp)
 
 
 if __name__ == "__main__":
