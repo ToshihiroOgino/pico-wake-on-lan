@@ -9,7 +9,15 @@
 
 ## 使い方
 
-TCP で OTP だけを pico-server の IP アドレスに送信する
+TCP で OTP を pico-server の IP アドレスに送信する
+
+ペイロードの先頭 6 文字が OTP として認識される。
+TOTP で生成されたトークンと一致する場合、Wake-on-Lan の Magic Packet を送信する
+
+応答は送信した内容に `_ok` または `_ng` を付加したもの
+
+- 成功時: <送信内容>\_ok
+- 失敗: <送信内容>\_ng
 
 ```sh
 # echo + nc
