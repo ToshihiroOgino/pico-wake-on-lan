@@ -26,8 +26,7 @@ err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 	tcp_recved(pcb, p->len);
 	pbuf_free(p);
 
-	auto is_valid =
-			is_valid_otp(std::string(received_data, len), get_posix_time_utc());
+	auto is_valid = is_valid_otp(get_posix_time_utc(), received_data, len);
 	if (is_valid) {
 		printf("Valid OTP received: %s\n", received_data);
 		send_magic_packet();

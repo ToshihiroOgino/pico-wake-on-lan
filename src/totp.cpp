@@ -3,6 +3,7 @@
 #include "time.h"
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -91,11 +92,16 @@ string generate_totp(time_t current_time) {
 	return otp_str;
 }
 
-bool is_valid_otp(const std::string &otp, time_t current_time) {
-	if (otp.length() != DIGITS) {
+bool is_valid_otp(time_t current_time, const char *received_otp,
+									size_t received_length) {
+	if (received_length < DIGITS) {
 		return false;
 	}
 
+	char otp[DIGITS + 1];
+	strncpy(otp, received_otp, DIGITS);
+	otp[DIGITS] = '\0';
+
 	string generated_otp = generate_totp(current_time);
-	return otp == generated_otp;
+	return strcmp(otp, generated_otp.c_str()) == 0;
 }
