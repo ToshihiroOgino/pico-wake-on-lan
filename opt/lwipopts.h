@@ -1,6 +1,14 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
+// The following is needed to test mDns
+#define LWIP_MDNS_RESPONDER 1
+#define LWIP_IGMP 1
+#define LWIP_NUM_NETIF_CLIENT_DATA 1
+#define MDNS_RESP_USENETIF_EXTCALLBACK 1
+#define MEMP_NUM_SYS_TIMEOUT (LWIP_NUM_SYS_TIMEOUT_INTERNAL + 3)
+#define MEMP_NUM_TCP_PCB 12
+
 // Common settings used in most of the pico_w examples
 // (see https://www.nongnu.org/lwip/2_1_x/group__lwip__opts.html for details)
 
