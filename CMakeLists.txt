@@ -1,5 +1,7 @@
 # Generated Cmake Pico project file
 
+set(project_name pico-server)
+
 cmake_minimum_required(VERSION 3.13)
 
 set(CMAKE_C_STANDARD 11)
@@ -35,10 +37,10 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
+file(GLOB_RECURSE SRC_FILES "src/*.cpp")
+
 add_executable(pico-server
-    src/pico-server.cpp
-    src/error_handler.cpp
-    src/xip_config.cpp
+    ${SRC_FILES}
     )
 
 pico_set_program_name(pico-server "pico-server")

@@ -9,7 +9,7 @@ def send_message():
     # Server address and port
     PORT = 8000
     # addr = "192.168.1.99"
-    addr = "PicoW0000.local"
+    addr = "pico-server.local"
     server_address = (addr, PORT)  # Default port 8080, change if needed
 
     try:

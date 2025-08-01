@@ -63,6 +63,7 @@
             "command": "picotool",
             "args": [
                 "load",
+                "-fx",
                 "-o",
                 "0x10100000",
                 "-t",
