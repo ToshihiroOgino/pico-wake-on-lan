@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "mbedtls/md.h"
 #include "mbedtls/sha256.h"
 #include "mbedtls/version.h"
 #include "pico/stdlib.h"
@@ -26,6 +27,9 @@ vector<uint8_t> base32_decode(const string &encoded_str) {
 		if (c >= 'a' && c <= 'z')
 			c = toupper(c);
 		size_t value = base32_chars.find(c);
+		if (c == '=') {
+			continue;
+		}
 		if (value == string::npos)
 			continue;
 
@@ -37,6 +41,10 @@ vector<uint8_t> base32_decode(const string &encoded_str) {
 			bits_left -= 8;
 		}
 	}
+	if (bits_left > 0) {
+		decoded_bytes.push_back((buffer << (8 - bits_left)) & 0xFF);
+	}
+
 	return decoded_bytes;
 }
 
@@ -54,20 +62,41 @@ string generate_totp(time_t current_time) {
 		t >>= 8;
 	}
 
-	unsigned char hmac_result[32];
-	mbedtls_sha256_context ctx;
-	mbedtls_sha256_init(&ctx);
-	mbedtls_sha256_starts(&ctx, 0);
-	mbedtls_sha256_update(&ctx, key_decoded.data(), key_decoded.size());
-	mbedtls_sha256_update(&ctx, t_bytes, 8);
-	mbedtls_sha256_finish(&ctx, hmac_result);
-	mbedtls_sha256_free(&ctx);
+	printf("t_bytes: ");
+	for (const auto &byte : t_bytes) {
+		printf("%02x", byte);
+	}
+	printf("\n");
+
+	unsigned char hmac_result[32] = {};
+	mbedtls_md_context_t ctx;
+	mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
+	mbedtls_md_init(&ctx);
+	mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 1);
+	mbedtls_md_hmac_starts(&ctx, key_decoded.data(), key_decoded.size());
+	mbedtls_md_hmac_update(&ctx, t_bytes, 8);
+	mbedtls_md_hmac_finish(&ctx, hmac_result);
+	mbedtls_md_free(&ctx);
+
+	printf("t_bytes: ");
+	for (const auto &byte : t_bytes) {
+		printf("%02x", byte);
+	}
+	printf("\n");
+	printf("HMAC Result: ");
+	for (const auto &byte : hmac_result) {
+		printf("%02x", byte);
+	}
+	printf("\n");
 
 	int offset = hmac_result[31] & 0x0F;
 	uint32_t truncated_hash = (hmac_result[offset] & 0x7F) << 24 |
 														(hmac_result[offset + 1] & 0xFF) << 16 |
 														(hmac_result[offset + 2] & 0xFF) << 8 |
 														(hmac_result[offset + 3] & 0xFF);
+
+	printf("Offset: %d\n", offset);
+	printf("Truncated Hash: %u\n", truncated_hash);
 
 	int power_of_10 = 1;
 	for (int i = 0; i < DIGITS; ++i) {

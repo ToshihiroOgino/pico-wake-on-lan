@@ -56,14 +56,16 @@ int main() {
 
 	while (true) {
 		// printf(".");
-		time_t current_time = get_time_utc();
-		printf("%04d-%02d-%02d %02d:%02d:%02d UTC\n",
-					 1900 + localtime(&current_time)->tm_year,
-					 1 + localtime(&current_time)->tm_mon,
-					 localtime(&current_time)->tm_mday, localtime(&current_time)->tm_hour,
-					 localtime(&current_time)->tm_min, localtime(&current_time)->tm_sec);
+		const time_t current_time = get_posix_time_utc();
+		printf("Current Time: %d\n", (u32_t)current_time);
+		struct tm *utc = gmtime(&current_time);
+		printf("%04d-%02d-%02d %02d:%02d:%02d UTC\n", 1900 + utc->tm_year,
+					 1 + utc->tm_mon, utc->tm_mday, utc->tm_hour, utc->tm_min,
+					 utc->tm_sec);
 
-		auto otp = generate_totp(current_time);
+		// auto otp = generate_totp(current_time);
+		auto otp = generate_totp(0);
+		printf("TOTP Secret: %s\n", totp_secret.c_str());
 		printf("Current OTP: %s\n", otp.c_str());
 
 		toggle_led();

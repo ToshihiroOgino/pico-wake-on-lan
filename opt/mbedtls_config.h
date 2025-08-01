@@ -1,6 +1,8 @@
 #ifndef _MBEDTLS_CONFIG_H
 #define _MBEDTLS_CONFIG_H
 
+#define MBEDTLS_MD_C
+
 #if LIB_PICO_SHA256
 // Enable hardware acceleration
 #define MBEDTLS_SHA256_ALT

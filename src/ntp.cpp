@@ -149,13 +149,12 @@ int run_ntp_client() {
 	return 0;
 }
 
-time_t get_time_utc() {
+time_t get_posix_time_utc() {
 	if (!ntp_client) {
 		return 0;
 	}
-	auto now = get_absolute_time();
-	auto diff = absolute_time_diff_us(ntp_client->ntp_succeed_at, now);
-	time_t diff_sec = diff / 1000000;
-	time_t current_time = ntp_client->ntp_result_utc + diff_sec;
-	return current_time;
+	absolute_time_t diff =
+			absolute_time_diff_us(ntp_client->ntp_succeed_at, get_absolute_time());
+	time_t now = time_t(ntp_client->ntp_result_utc) + time_t(diff / 1000000);
+	return now;
 }

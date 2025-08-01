@@ -18,6 +18,6 @@ extern ntp_client_t *ntp_client;
 
 int run_ntp_client();
 
-time_t get_time_utc();
+time_t get_posix_time_utc();
 
 #endif // NTP_H
