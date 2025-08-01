@@ -23,6 +23,10 @@ void load_config() {
 	istringstream iss(config_ptr);
 	string line;
 	while (getline(iss, line)) {
+		if (line.empty() || line[0] == '#') {
+			// Skip empty lines and comments
+			continue;
+		}
 		const size_t separator_pos = line.find('=');
 		if (separator_pos != string::npos) {
 			string key = line.substr(0, separator_pos);
@@ -33,7 +37,8 @@ void load_config() {
 			handle_error(("Invalid config line: " + line).c_str());
 		}
 	}
-	printf("Configuration loaded successfully.\n");	return;
+	printf("Configuration loaded successfully.\n");
+	return;
 }
 
 string get_config_value(const string &key) {

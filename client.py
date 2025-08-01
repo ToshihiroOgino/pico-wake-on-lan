@@ -20,7 +20,7 @@ def send_message():
         print(f"Connected to {server_address[0]}:{server_address[1]}")
 
         # Send message
-        message = "Hello World"
+        message = "214850"
         client_socket.sendall(message.encode("utf-8"))
         print(f"Sent: {message}")
 

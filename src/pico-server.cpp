@@ -14,6 +14,7 @@
 #include "net.h"
 #include "ntp.h"
 #include "server.h"
+#include "totp.h"
 #include "xip_config.h"
 
 int main() {
@@ -47,6 +48,9 @@ int main() {
 		handle_error("Failed to start NTP client");
 	}
 
+	const auto totp_secret = get_config_value("totp_secret");
+	totp_init(totp_secret);
+
 	start_server(port);
 	printf("Server started on port %d\n", port);
 
@@ -58,8 +62,12 @@ int main() {
 					 1 + localtime(&current_time)->tm_mon,
 					 localtime(&current_time)->tm_mday, localtime(&current_time)->tm_hour,
 					 localtime(&current_time)->tm_min, localtime(&current_time)->tm_sec);
+
+		auto otp = generate_totp(current_time);
+		printf("Current OTP: %s\n", otp.c_str());
+
 		toggle_led();
-		sleep_ms(1000);
+		sleep_ms(3000);
 	}
 
 	cyw43_arch_lwip_end();

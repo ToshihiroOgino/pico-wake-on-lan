@@ -1,11 +1,17 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "error_handler.h"
 #include "lwip/pbuf.h"
 #include "lwip/tcp.h"
 #include "pico/stdlib.h"
 #include <cstring>
+
+#include "error_handler.h"
+#include "ntp.h"
+#include "totp.h"
+
+#define BUFFER_SIZE (PBUF_POOL_BUFSIZE + 1)
+char received_data[BUFFER_SIZE];
 
 err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 	if (err != ERR_OK || !p) {
@@ -13,15 +19,15 @@ err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 		return ERR_VAL;
 	}
 	auto len = p->len;
-	char *received_data = (char *)calloc(p->len + 1, sizeof(char));
-	if (!received_data) {
-		handle_error("Failed to allocate memory for received data");
-		return ERR_MEM;
-	}
 	memcpy(received_data, p->payload, p->len);
+	received_data[BUFFER_SIZE - 1] = '\0';
 	printf("Received data: %.*s\n", p->len, received_data);
 	tcp_recved(pcb, p->len);
 	pbuf_free(p);
+
+	if (is_valid_otp(std::string(received_data, len), get_time_utc())) {
+		printf("Valid OTP received: %s\n", received_data);
+	}
 
 	// Echo back the received data
 	if (tcp_sndbuf(pcb) < len) {
@@ -32,11 +38,8 @@ err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 	if (err != ERR_OK) {
 		printf("tcp_write failed: %d\n", err);
 	}
-
-	tcp_close(pcb);
 	printf("Connection closed\n");
-
-	return ERR_OK;
+	return tcp_close(pcb);
 }
 
 err_t server_sent(void *arg, struct tcp_pcb *pcb, u16_t len) {
