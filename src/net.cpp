@@ -2,6 +2,8 @@
 #define MDNS_H
 
 #include "lwip/apps/mdns.h"
+#include "lwip/dns.h"
+#include "lwip/ip.h"
 #include "pico/cyw43_arch.h"
 #include <stdio.h>
 

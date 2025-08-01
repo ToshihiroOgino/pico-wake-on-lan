@@ -12,6 +12,7 @@
 #include "error_handler.h"
 #include "hard.h"
 #include "net.h"
+#include "ntp.h"
 #include "server.h"
 #include "xip_config.h"
 
@@ -38,6 +39,11 @@ int main() {
 
 	if (init_mdns(hostname.c_str(), port)) {
 		handle_error("Failed to initialize mDNS");
+	}
+
+	printf("Starting NTP client...\n");
+	if (run_ntp_client()) {
+		handle_error("Failed to start NTP client");
 	}
 
 	start_server(port);
