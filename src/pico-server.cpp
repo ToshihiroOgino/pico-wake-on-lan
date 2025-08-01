@@ -59,12 +59,7 @@ int main() {
 					 1 + utc->tm_mon, utc->tm_mday, utc->tm_hour, utc->tm_min,
 					 utc->tm_sec);
 
-		auto otp = generate_totp(current_time);
-		printf("Current OTP: %s\n", otp.c_str());
-
 		toggle_led();
-		sleep_ms(3000);
+		sleep_ms(10000);
 	}
-
-	cyw43_arch_lwip_end();
 }
