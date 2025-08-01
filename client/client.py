@@ -1,13 +1,11 @@
 import socket
 import os
 import hashlib
-from dotenv import load_dotenv
-
 import hmac
-import hashlib
 from datetime import datetime, timezone
 import base64
 import struct
+from dotenv import load_dotenv
 
 TOTP_TIME_STEP = 30
 DIGITS = 6
