@@ -28,12 +28,13 @@ int main() {
 		handle_error("Failed to initialize CYW43 architecture");
 	}
 
+	const auto ipv4 = get_config_value("ipv4");
 	const auto ssid = get_config_value("ssid");
 	const auto password = get_config_value("password");
 	const int port = atoi(get_config_value("port").c_str());
 	const auto hostname = get_config_value("hostname");
 	printf("Connecting to WiFi SSID: %s\n", ssid.c_str());
-	if (connect_wifi(ssid.c_str(), password.c_str())) {
+	if (connect_wifi(ssid.c_str(), password.c_str(), ipv4.c_str())) {
 		handle_error("Failed to connect to WiFi");
 	}
 

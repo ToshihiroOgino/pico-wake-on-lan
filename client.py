@@ -7,10 +7,12 @@ def send_message():
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # Server address and port
-    PORT = 8000
-    # addr = "192.168.1.99"
+    port = 8000
     addr = "pico-server.local"
-    server_address = (addr, PORT)  # Default port 8080, change if needed
+    # addr = "192.168.1.110"
+    # addr = "arnorid.com"
+    # port = 13000
+    server_address = (addr, port)  # Default port 8080, change if needed
 
     try:
         # Connect to the server
