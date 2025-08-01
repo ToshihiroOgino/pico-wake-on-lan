@@ -1,5 +1,36 @@
 # Pico Server
 
+外部からの TCP パケットを受けて Wake-on-Lan の Magic Packet を送信するアプリケーション
+
+対応デバイス:
+
+- Raspberry Pi Pico W
+- Raspberry Pi Pico 2W
+
+## 使い方
+
+TCP で OTP だけを pico-server の IP アドレスに送信する
+
+```sh
+# echo + nc
+echo -n "012345" | nc <pico-server-ip> <port>
+# response: 012345_ok or 012345_ng
+```
+
+```sh
+# .env ファイルが必要
+python3 ./client/client.py
+```
+
+### Time-Based One-Time Password 仕様
+
+TOTP の仕様は [RFC 6238](https://datatracker.ietf.org/doc/html/rfc6238) に準拠する
+
+- 生成インターバル: 30 秒
+- ハッシュアルゴリズム: SHA-256
+- シークレットキー: Base32 エンコードされた文字列
+- トークン長: 6 桁
+
 ## 設定
 
 picotool を sudo なしで実行する設定
@@ -29,30 +60,4 @@ XIP の空き領域に WiFi パスワードなどの設定を書き込むため�
 
 ```sh
 picotool load -fx -o 0x10100000 -t bin config
-```
-
-## Time-Based One-Time Password
-
-### 仕様
-
-TOTP の仕様は [RFC 6238](https://datatracker.ietf.org/doc/html/rfc6238) に準拠する
-
-- 生成インターバル: 30 秒
-- ハッシュアルゴリズム: SHA-256
-- シークレットキー: Base32 エンコードされた文字列
-- トークン長: 6 桁
-
-### OTP 認証方法
-
-TCP で OTP だけを pico-server の IP アドレスに送信する
-
-```sh
-# echo + nc
-echo -n "012345" | nc <pico-server-ip> <port>
-# response: 012345_ok or 012345_ng
-```
-
-```sh
-# .env ファイルが必要
-python3 ./client/client.py
 ```
