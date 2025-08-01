@@ -4,7 +4,6 @@
 #include "lwip/ip.h"
 #include "lwip/udp.h"
 #include "pico/cyw43_arch.h"
-// #include "pico/stdlib.h"
 
 typedef struct {
 	ip_addr_t ntp_server_address;
