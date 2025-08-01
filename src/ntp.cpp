@@ -154,7 +154,7 @@ time_t get_time_utc() {
 		return 0;
 	}
 	auto now = get_absolute_time();
-	auto diff = absolute_time_diff_us(now, ntp_client->ntp_succeed_at);
+	auto diff = absolute_time_diff_us(ntp_client->ntp_succeed_at, now);
 	time_t diff_sec = diff / 1000000;
 	time_t current_time = ntp_client->ntp_result_utc + diff_sec;
 	return current_time;

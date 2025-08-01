@@ -51,7 +51,13 @@ int main() {
 	printf("Server started on port %d\n", port);
 
 	while (true) {
-		printf(".");
+		// printf(".");
+		time_t current_time = get_time_utc();
+		printf("%04d-%02d-%02d %02d:%02d:%02d UTC\n",
+					 1900 + localtime(&current_time)->tm_year,
+					 1 + localtime(&current_time)->tm_mon,
+					 localtime(&current_time)->tm_mday, localtime(&current_time)->tm_hour,
+					 localtime(&current_time)->tm_min, localtime(&current_time)->tm_sec);
 		toggle_led();
 		sleep_ms(1000);
 	}
