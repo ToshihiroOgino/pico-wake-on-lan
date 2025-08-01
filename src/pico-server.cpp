@@ -1,13 +1,5 @@
-// #include <time.h>
-
 #include "pico/cyw43_arch.h"
 #include "pico/stdlib.h"
-
-// #include "lwip/apps/mdns.h"
-// #include "lwip/netif.h"
-// #include "lwip/pbuf.h"
-// #include "lwip/tcp.h"
-// #include "lwip/tcpip.h"
 
 #include "error_handler.h"
 #include "hard.h"
@@ -34,6 +26,8 @@ int main() {
 	const auto password = get_config_value("password");
 	const int port = atoi(get_config_value("port").c_str());
 	const auto hostname = get_config_value("hostname");
+	const auto totp_secret = get_config_value("totp_secret");
+
 	printf("Connecting to WiFi SSID: %s\n", ssid.c_str());
 	if (connect_wifi(ssid.c_str(), password.c_str(), ipv4.c_str())) {
 		handle_error("Failed to connect to WiFi");
@@ -48,24 +42,19 @@ int main() {
 		handle_error("Failed to start NTP client");
 	}
 
-	const auto totp_secret = get_config_value("totp_secret");
 	totp_init(totp_secret);
 
 	start_server(port);
 	printf("Server started on port %d\n", port);
 
 	while (true) {
-		// printf(".");
 		const time_t current_time = get_posix_time_utc();
-		printf("Current Time: %d\n", (u32_t)current_time);
 		struct tm *utc = gmtime(&current_time);
 		printf("%04d-%02d-%02d %02d:%02d:%02d UTC\n", 1900 + utc->tm_year,
 					 1 + utc->tm_mon, utc->tm_mday, utc->tm_hour, utc->tm_min,
 					 utc->tm_sec);
 
-		// auto otp = generate_totp(current_time);
-		auto otp = generate_totp(0);
-		printf("TOTP Secret: %s\n", totp_secret.c_str());
+		auto otp = generate_totp(current_time);
 		printf("Current OTP: %s\n", otp.c_str());
 
 		toggle_led();

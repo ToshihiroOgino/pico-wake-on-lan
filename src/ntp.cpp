@@ -155,6 +155,6 @@ time_t get_posix_time_utc() {
 	}
 	absolute_time_t diff =
 			absolute_time_diff_us(ntp_client->ntp_succeed_at, get_absolute_time());
-	time_t now = time_t(ntp_client->ntp_result_utc) + time_t(diff / 1000000);
+	time_t now = ntp_client->ntp_result_utc + time_t(diff / 1000000);
 	return now;
 }

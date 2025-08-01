@@ -9,7 +9,6 @@
 
 #include "mbedtls/md.h"
 #include "mbedtls/sha256.h"
-#include "mbedtls/version.h"
 #include "pico/stdlib.h"
 
 using namespace std;
@@ -62,12 +61,6 @@ string generate_totp(time_t current_time) {
 		t >>= 8;
 	}
 
-	printf("t_bytes: ");
-	for (const auto &byte : t_bytes) {
-		printf("%02x", byte);
-	}
-	printf("\n");
-
 	unsigned char hmac_result[32] = {};
 	mbedtls_md_context_t ctx;
 	mbedtls_md_type_t md_type = MBEDTLS_MD_SHA256;
@@ -78,25 +71,11 @@ string generate_totp(time_t current_time) {
 	mbedtls_md_hmac_finish(&ctx, hmac_result);
 	mbedtls_md_free(&ctx);
 
-	printf("t_bytes: ");
-	for (const auto &byte : t_bytes) {
-		printf("%02x", byte);
-	}
-	printf("\n");
-	printf("HMAC Result: ");
-	for (const auto &byte : hmac_result) {
-		printf("%02x", byte);
-	}
-	printf("\n");
-
 	int offset = hmac_result[31] & 0x0F;
 	uint32_t truncated_hash = (hmac_result[offset] & 0x7F) << 24 |
 														(hmac_result[offset + 1] & 0xFF) << 16 |
 														(hmac_result[offset + 2] & 0xFF) << 8 |
 														(hmac_result[offset + 3] & 0xFF);
-
-	printf("Offset: %d\n", offset);
-	printf("Truncated Hash: %u\n", truncated_hash);
 
 	int power_of_10 = 1;
 	for (int i = 0; i < DIGITS; ++i) {
