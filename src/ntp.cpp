@@ -66,8 +66,16 @@ void ntp_recv(void *arg, udp_pcb *pcb, pbuf *p, const ip_addr_t *addr,
 }
 
 void ntp_request(ntp_client_t *client) {
+	printf("Sending NTP request to %s\n",
+				 ipaddr_ntoa(&client->ntp_server_address));
 	cyw43_arch_lwip_begin();
 	auto p = pbuf_alloc(PBUF_TRANSPORT, NTP_MSG_LEN, PBUF_RAM);
+	if (!p) {
+		printf("Failed to allocate pbuf for NTP request\n");
+		ntp_result(client, -1, nullptr);
+		cyw43_arch_lwip_end();
+		return;
+	}
 	auto *req = (u8_t *)p->payload;
 	memset(req, 0, NTP_MSG_LEN);
 	req[0] = 0x1b;
@@ -103,8 +111,10 @@ void request_worker_fn(__unused async_context_t *context,
 	}
 	auto res = dns_gethostbyname(NTP_SERVER, &client->ntp_server_address,
 															 ntp_dns_found, client);
-	if (res != ERR_OK) {
-		ntp_request(client);
+	if (res == ERR_OK) {
+		// Do nothing, the callback will handle the request
+	} else if (res == ERR_INPROGRESS) {
+		printf("DNS request in progress for %s\n", NTP_SERVER);
 	} else {
 		printf("DNS request failed\n");
 		ntp_result(client, -1, nullptr);
@@ -119,7 +129,6 @@ void resend_worker_fn(__unused async_context_t *context,
 }
 
 int run_ntp_client() {
-
 	ntp_client = (ntp_client_t *)calloc(1, sizeof(ntp_client_t));
 	if (!ntp_client) {
 		return 1;
