@@ -16,27 +16,15 @@
 ntp_client_t *ntp_client = NULL;
 
 void ntp_result(ntp_client_t *client, int status, time_t *result_utc) {
-	if (status == 0 && result_utc) {
-		client->ntp_succeed_at = get_absolute_time();
-		client->ntp_result_utc = *result_utc;
-
-		struct tm *utc = gmtime(result_utc);
-		printf("NTP time: %04d-%02d-%02d %02d:%02d:%02d UTC\n", 1900 + utc->tm_year,
-					 utc->tm_mon + 1, utc->tm_mday, utc->tm_hour, utc->tm_min,
-					 utc->tm_sec);
+	if (status != 0 || !result_utc) {
+		// If failed, do nothing
+		return;
 	}
-	async_context_remove_at_time_worker(cyw43_arch_async_context(),
-																			&client->resend_worker);
-	async_context_remove_at_time_worker(cyw43_arch_async_context(),
-																			&client->request_worker);
-	while (!async_context_add_at_time_worker_in_ms(cyw43_arch_async_context(),
-																								 &client->request_worker,
-																								 NTP_REQUEST_TIME_MS)) {
-		printf("Failed to add NTP request worker\n");
-		sleep_ms(100);
-		async_context_remove_at_time_worker(cyw43_arch_async_context(),
-																				&client->request_worker);
-	}
+	client->ntp_succeed_at = get_absolute_time();
+	client->ntp_result_utc = *result_utc;
+	struct tm *utc = gmtime(result_utc);
+	printf("NTP time: %04d-%02d-%02d %02d:%02d:%02d UTC\n", 1900 + utc->tm_year,
+				 utc->tm_mon + 1, utc->tm_mday, utc->tm_hour, utc->tm_min, utc->tm_sec);
 }
 
 void ntp_recv(void *arg, udp_pcb *pcb, pbuf *p, const ip_addr_t *addr,
@@ -63,6 +51,17 @@ void ntp_recv(void *arg, udp_pcb *pcb, pbuf *p, const ip_addr_t *addr,
 		ntp_result(client, -1, nullptr);
 	}
 	pbuf_free(p);
+
+	async_context_remove_at_time_worker(cyw43_arch_async_context(),
+																			&client->request_worker);
+	while (!async_context_add_at_time_worker_in_ms(cyw43_arch_async_context(),
+																								 &client->request_worker,
+																								 NTP_REQUEST_TIME_MS)) {
+		printf("Failed to add NTP request worker\n");
+		sleep_ms(100);
+		async_context_remove_at_time_worker(cyw43_arch_async_context(),
+																				&client->request_worker);
+	}
 }
 
 void ntp_request(ntp_client_t *client) {
@@ -100,21 +99,13 @@ void ntp_dns_found(const char *hostname, const ip_addr_t *ipaddr, void *arg) {
 void request_worker_fn(__unused async_context_t *context,
 											 async_at_time_worker_t *worker) {
 	auto client = (ntp_client_t *)worker->user_data;
-	async_context_remove_at_time_worker(cyw43_arch_async_context(),
-																			&client->resend_worker);
-	while (!async_context_add_at_time_worker_in_ms(
-			cyw43_arch_async_context(), &client->resend_worker, NTP_RESEND_TIME_MS)) {
-		printf("Failed to add NTP resend worker\n");
-		sleep_ms(100);
-		async_context_remove_at_time_worker(cyw43_arch_async_context(),
-																				&client->resend_worker);
-	}
 	auto res = dns_gethostbyname(NTP_SERVER, &client->ntp_server_address,
 															 ntp_dns_found, client);
 	if (res == ERR_OK) {
 		// Do nothing, the callback will handle the request
 	} else if (res == ERR_INPROGRESS) {
 		printf("DNS request in progress for %s\n", NTP_SERVER);
+		ntp_result(client, -1, nullptr);
 	} else {
 		printf("DNS request failed\n");
 		ntp_result(client, -1, nullptr);
@@ -139,12 +130,10 @@ int run_ntp_client() {
 		ntp_client = NULL;
 		return 1;
 	}
-
 	udp_recv(ntp_client->pcb, ntp_recv, ntp_client);
+
 	ntp_client->request_worker.do_work = request_worker_fn;
 	ntp_client->request_worker.user_data = ntp_client;
-	ntp_client->resend_worker.do_work = resend_worker_fn;
-	ntp_client->resend_worker.user_data = ntp_client;
 
 	if (!async_context_add_at_time_worker_in_ms(cyw43_arch_async_context(),
 																							&ntp_client->request_worker, 0)) {
