@@ -26,9 +26,9 @@ void ntp_result(ntp_client_t *client, int status, time_t *result_utc) {
 					 utc->tm_sec);
 	}
 	async_context_remove_at_time_worker(cyw43_arch_async_context(),
-																			&client->request_worker);
-	async_context_remove_at_time_worker(cyw43_arch_async_context(),
 																			&client->resend_worker);
+	async_context_remove_at_time_worker(cyw43_arch_async_context(),
+																			&client->request_worker);
 	while (!async_context_add_at_time_worker_in_ms(cyw43_arch_async_context(),
 																								 &client->request_worker,
 																								 NTP_REQUEST_TIME_MS)) {
