@@ -11,8 +11,32 @@
 #include "totp.h"
 #include "wake_on_lan.h"
 
+#define MAX_POLL_COUNT 10
+#define TIMEOUT_MS 5000
+
+typedef struct {
+	absolute_time_t connected_at;
+	int poll_count;
+} server_state_t;
+
+server_state_t state;
+
 #define BUFFER_SIZE (PBUF_POOL_BUFSIZE + 1)
 char received_data[BUFFER_SIZE];
+
+err_t validate_state(struct tcp_pcb *pcb, server_state_t *state) {
+	const auto epoch = get_absolute_time();
+	const auto ttl = absolute_time_diff_us(state->connected_at, epoch);
+	if (ttl > TIMEOUT_MS * 1000) {
+		printf("Connection timed out.\n");
+		return tcp_close(pcb);
+	}
+	if (state->poll_count >= MAX_POLL_COUNT) {
+		printf("Max poll count reached.\n");
+		return tcp_close(pcb);
+	}
+	return ERR_OK;
+}
 
 err_t server_recv(void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) {
 	if (err != ERR_OK || !p) {
@@ -55,10 +79,11 @@ err_t server_sent(void *arg, struct tcp_pcb *pcb, u16_t len) {
 }
 
 err_t server_poll(void *arg, struct tcp_pcb *pcb) {
-	LWIP_UNUSED_ARG(arg);
 	LWIP_UNUSED_ARG(pcb);
 	printf("\rserver_poll called");
-	return ERR_OK;
+	auto state = (server_state_t *)arg;
+	state->poll_count++;
+	return validate_state(pcb, state);
 }
 
 err_t server_accept(void *arg, struct tcp_pcb *client_pcb, err_t err) {
@@ -68,11 +93,13 @@ err_t server_accept(void *arg, struct tcp_pcb *client_pcb, err_t err) {
 	}
 	printf("accepted client connection\n");
 
+	state.poll_count = 0;
+	state.connected_at = get_absolute_time();
+
 	tcp_nagle_disable(client_pcb);
-	tcp_arg(client_pcb, NULL);
+	tcp_arg(client_pcb, &state);
 	tcp_recv(client_pcb, server_recv);
 	tcp_sent(client_pcb, server_sent);
-	tcp_err(client_pcb, NULL);
 	tcp_poll(client_pcb, server_poll, 4);
 	return ERR_OK;
 }
