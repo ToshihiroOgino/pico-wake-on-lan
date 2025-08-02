@@ -49,9 +49,7 @@ void ntp_recv(void *arg, udp_pcb *pcb, pbuf *p, const ip_addr_t *addr,
 	u8_t mode = pbuf_get_at(p, 0) & 0x07;
 	u8_t stratum = pbuf_get_at(p, 1);
 
-	auto is_valid =
-			(ip_addr_cmp(addr, &client->ntp_server_address) && port == NTP_PORT &&
-			 p->tot_len == NTP_MSG_LEN && mode == 0x4 && stratum != 0);
+	auto is_valid = (p->tot_len == NTP_MSG_LEN && mode == 0x4 && stratum != 0);
 	if (is_valid) {
 		u8_t seconds_buf[4] = {};
 		pbuf_copy_partial(p, seconds_buf, sizeof(seconds_buf), 40);
