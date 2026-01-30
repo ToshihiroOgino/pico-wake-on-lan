@@ -1,4 +1,4 @@
-# Pico Server
+# Pico Wake on Lan
 
 外部からの TCP パケットを受けて Wake-on-Lan の Magic Packet を送信するアプリケーション
 
